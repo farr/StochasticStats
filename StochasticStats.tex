@@ -1,0 +1,203 @@
+\documentclass[modern]{aastex63}
+
+\usepackage{acro}
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+\DeclareMathOperator{\var}{var}
+
+\newcommand{\dd}{\mathrm{d}}
+\newcommand{\diff}[2]{\frac{\dd #1}{\dd #2}}
+
+\DeclareAcronym{PSD}{
+  short = {PSD},
+  long = {power spectral density}
+}
+\DeclareAcronym{SNR}{
+  short = {SNR},
+  long = {signal to noise ratio}
+}
+
+\begin{document}
+
+\title{Optimal Detection of Stochastic Signals}
+\author[0000-0003-1540-8562]{Will M. Farr}
+\email{wfarr@flatironinstitute.org}
+\affiliation{Center for Computational Astronomy, Flatiron Institute, New York NY 10010, United States}
+\affiliation{Department of Physics and Astronomy, Stony Brook University, Stony Brook NY 11794, United States}
+
+\begin{abstract}
+%
+  I derive an optimal statistic for detection of a common stochastic signal in
+  independent data streams.  I compute the SNR in terms of the \ac{PSD} of the
+  common signal and each stream's noise, and give several useful limits.
+%
+\end{abstract}
+
+\section{Formalities}
+
+Imagine we have a stochastic stationary zero-mean Gaussian signal, $h(t)$, whose
+\ac{PSD} is $P_h(f)$:
+%
+\begin{equation}
+P_h(f) = \lim_{T \to \infty} \frac{1}{T} \left| \int_{-T}^{T} \dd t \, e^{-2\pi f t} h(t) \right|^2.
+\end{equation}
+%
+The signal is linearly projected into two data streams\footnote{The formalism
+here generalizes easily to an arbitrary number of data streams.} with
+independent stochastic stationary zero-mean Gaussian noise:
+%
+\begin{equation}
+  s_1(t) = A_1 h(t) + n_1(t)
+\end{equation}
+%
+and
+%
+\begin{equation}
+  s_2(t) = A_2 h(t) + n_2(t),
+\end{equation}
+%
+where the \ac{PSD} of each stream's noise is
+%
+\begin{equation}
+  P_i(f) = \lim_{T \to \infty} \frac{1}{T} \left| \int_{-T}^{T} \dd t \, e^{-2\pi f t} n_i(t) \right|^2,
+\end{equation}
+%
+and the signal and both noise streams are independent:
+%
+\begin{equation}
+  p\left( h, n_1, n_2 \right) = p\left( h \right) p\left( n_1 \right) p\left( n_2 \right).
+\end{equation}
+
+Stationarity implies that the Fourier components are independent; Gaussianity
+and the \acp{PSD} imply that
+%
+\begin{equation}
+  \tilde{h}(f) \sim N\left[0, \sqrt{T P_h(f)} \right]
+\end{equation}
+%
+and
+%
+\begin{equation}
+  \tilde{s}_i(f) \sim N\left[ A_i \tilde{h}(f), \sqrt{T P_i(f)} \right],
+\end{equation}
+%
+where $N[\mu, \sigma]$ is a Gaussian distribution with mean $\mu$ and standard
+deviation $\sigma$.  Integrating out the (unknown) signal $h$\footnote{See
+\citet{Cornish2013}.}, we have the marginal likelihood for the data streams
+%
+\begin{multline}
+  \mathcal{L} \left( s_1(f), s_2(f) \mid P_h(f) \right) = \int \dd h(f) \, N\left[ A_1 \tilde{h}(f), \sqrt{T P_1(f)} \right]\left( s_1(f) \right) \\ \times N\left[ A_2 \tilde{h}(f), \sqrt{T P_2(f)} \right]\left( s_2(f) \right) N\left[0, \sqrt{T P_h(f)} \right]\left( h(f) \right).
+\end{multline}
+A bit of algebra reveals
+%
+\begin{multline}
+  \mathcal{L} \left( s_1, s_2 \mid P_h \right) = \\ \frac{1}{2\pi \sqrt{S_h \left( A_2^2 S_1 + A_1^2 S_2 \right) + S_1 S_2}} \exp\left[ - \frac{\left(A_2 s_1 - A_1 s_2\right)^2 P_h + s_2^2 S_1 + s_1^2 S_2}{2 \left(\left(A_2^2 S_1 + A_1^2 S_2 \right)P_h + S_1 S_2 \right)}\right],
+\end{multline}
+%
+where we have suppressed the dependence on $f$ for the moment, and absorbed the
+$T$-dependence into $S$ via
+%
+\begin{equation}
+  S_x \equiv T P_x
+\end{equation}
+%
+(i.e.\ $S_x$ is the variance of $\tilde{x}$).
+
+The maximum-likelihood estimator of $P_h$ is
+%
+\begin{equation}
+  \label{eq:ml-est}
+ \hat{P}_h \equiv \frac{1}{T} \frac{\left( A_2 S_1 s_2 + A_1 S_2 s_1 \right)^2 - S_1 S_2 \left( A_2^2 S_1 + A_1^2 S_2 \right)}{\left( A_2^2 S_1 + A_1^2 S_2 \right)^2}.
+\end{equation}
+%
+The expected value of $\hat{P}_h$ is
+%
+\begin{equation}
+  \left\langle \hat{P}_h \right\rangle = P_h
+\end{equation}
+%
+(i.e.\ $\hat{P}$ is an un-biased estimator of $P_h$---whatever that is worth)
+and the variance is
+%
+\begin{equation}
+  \label{eq:est-variance}
+  \var \hat{P}_h = \frac{2 \left( S_h \left(A_2^2 S_1 + A_1^2 S_2 \right) + S_1 S_2 \right)^2}{T^2 \left( A_2^2 S_1 + A_1^2 S_2 \right)^2} = \frac{2 \left( P_h \left(A_2^2 P_1 + A_1^2 P_2 \right) + P_1 P_2 \right)^2}{\left( A_2^2 P_1 + A_1^2 P_2 \right)^2}
+\end{equation}
+%
+Note that the variance in Eq.\ \eqref{eq:est-variance} is independent of $T$, so
+that the \ac{SNR} \emph{in a single frequency bin} is independent of time.
+
+Typically we will be estimating the power in some range of frequencies, not just
+in a single bin.  Because the different frequencies are independent
+(stationarity), the optimal estimator for the integral of $P_h(f)$ over some
+range is given by
+%
+\begin{equation}
+  \int_{f_0}^{f_1} \dd f \, \hat{P}_h(f) \simeq \sum_{f = f_0}^{f_1} \Delta f \hat{P}_h(f),
+\end{equation}
+%
+where $\Delta f = 1/T$ is the frequency resolution implied by an observation
+over a time $T$.   The mean of this estimator is the integral of $P_h$ over the
+corresponding interval; the variance of this estimator is given by
+%
+\begin{equation}
+  \sum_{f = f_0}^{f_1} \Delta f^2 \var \hat{P}_h(f),
+\end{equation}
+%
+and therefore the \ac{SNR} of such a measurement is given by
+%
+\begin{equation}
+  \label{eq:finite-bandwidth-snr}
+  \rho = \frac{\sqrt{T} \int_{f_0}^{f_1} \dd f \, P_h\left( f \right)}{\sqrt{\int_{f_0}^{f_1} \dd f \, \var \hat{P}_h(f)}}
+\end{equation}
+%
+with $\var \hat{P}_h$ given by Eq.\ \eqref{eq:est-variance}.  We see that the
+\ac{SNR} for a measurement over some finite bandwidth grows with $\sqrt{T}$, as
+it should.
+
+\section{Useful Limits}
+
+\subsection{Signal-Dominated Limit}
+
+If $A^2_{1,2} P_h \gg P_{1,2}$ over the relevant range of frequencies, we have
+%
+\begin{equation}
+  \var \hat{P}_h \simeq 2 P_h^2,
+\end{equation}
+%
+and the per-bin \ac{SNR} asymptotes to $1/2$.  The finite-bandwidth \ac{SNR},
+Eq.\ \eqref{eq:finite-bandwidth-snr}, becomes
+%
+\begin{equation}
+  \rho \simeq \sqrt{\frac{T \left( f_1 - f_0 \right)}{2}} \frac{\left\langle P_h \right\rangle}{\sqrt{\left\langle P_h^2 \right\rangle}}
+\end{equation}
+%
+where angle brackets indicate an average over frequencies $f_0 \leq f \leq f_1$.
+Note that in this limit the \ac{SNR} is independent of the amplitude of $P_h$.
+
+\subsection{Noise-Dominated Limit}
+
+In the opposite limit, $A_{1,2} P_h \ll P_{1,2}$, we have
+%
+\begin{equation}
+  \var \hat{P}_h \simeq \frac{2 P_1^2 P_2^2}{\left( A_2^2 P_1 + A_1^2 P_2\right)^2} = \frac{2}{\left( A_1^2 / P_1 + A_2^2/P_2 \right)^2},
+\end{equation}
+%
+and the finite-bandwidth \ac{SNR} becomes
+%
+\begin{equation}
+  \rho \simeq \sqrt{\frac{T\left(f_1 - f_0 \right)}{2}} \frac{\left\langle P_h \right\rangle}{ \sqrt{\left\langle \frac{1}{\left( A_1^2 / P_1 + A_2^2/P_2 \right)^2}\right\rangle}}
+\end{equation}
+%
+and the \ac{SNR} is reduced compared to the signal-dominated case by a factor
+%
+\begin{equation}
+  \label{eq:approx-snr-reduction}
+  \alpha \sim \frac{A_1^2 P_h}{P_1} + \frac{A_2^2 P_h}{P_2}.
+\end{equation}
+%
+
+\bibliography{StochasticStats}
+
+\end{document}
